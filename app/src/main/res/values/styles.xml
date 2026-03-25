@@ -1,0 +1,12 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <declare-styleable name="MotionCurveView">
+        <!-- 横轴最多显示的数据-->
+        <attr name="maxCount" format="float" />
+        <!-- 线的颜色-->
+        <attr name="curveColor" format="color" />
+        <!-- 填充开始颜色-->
+        <attr name="shadowStartColor" format="color" />
+        <!-- 填充结束颜色-->
+        <attr name="shadowEndColor" format="color" />
+    </declare-styleable>
+</resources>

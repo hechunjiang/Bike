@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/bike">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl1"
+        android:layout_width="350dp"
+        android:layout_height="114dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/white_corners_20"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/iv_date"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginLeft="25dp"
+            android:src="@mipmap/date_icon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_date_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:text="日期"
+            android:textColor="#90A1B9"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toTopOf="@+id/tv_date_value"
+            app:layout_constraintStart_toEndOf="@+id/iv_date"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <TextView
+            android:id="@+id/tv_date_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="4dp"
+            android:text="2026/03/12"
+            android:textColor="#314158"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/tv_week"
+            app:layout_constraintStart_toEndOf="@+id/iv_date"
+            app:layout_constraintTop_toBottomOf="@+id/tv_date_key" />
+
+        <TextView
+            android:id="@+id/tv_week"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="4dp"
+            android:text="星期四"
+            android:textColor="#62748E"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/iv_date"
+            app:layout_constraintTop_toBottomOf="@+id/tv_date_value" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="1dp"
+            android:layout_height="64dp"
+            android:background="#E2E8F0"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/iv_time"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginLeft="25dp"
+            android:src="@mipmap/time_icon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/view"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_time_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:text="时间"
+            android:textColor="#90A1B9"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toTopOf="@+id/tv_time"
+            app:layout_constraintStart_toEndOf="@+id/iv_time"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <TextView
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:text="09:16:25"
+            android:textColor="#314158"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/iv_time"
+            app:layout_constraintTop_toBottomOf="@+id/tv_time_key" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl2"
+        android:layout_width="350dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/white_corners_20"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cl1">
+
+        <ImageView
+            android:id="@+id/iv_location"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="10dp"
+            android:src="@mipmap/locaation_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:text="距离"
+            android:textColor="#62748E"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_location"
+            app:layout_constraintStart_toEndOf="@+id/iv_location"
+            app:layout_constraintTop_toTopOf="@+id/iv_location" />
+
+        <TextView
+            android:id="@+id/tv_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="3.83"
+            android:textColor="#0A0A0A"
+            android:textSize="26sp"
+            app:layout_constraintStart_toStartOf="@+id/iv_location"
+            app:layout_constraintTop_toBottomOf="@+id/iv_location" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="km"
+            android:textColor="#90A1B9"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_distance"
+            app:layout_constraintStart_toEndOf="@+id/tv_distance" />
+
+        <com.example.demo.view.MotionCurveView
+            android:id="@+id/power_distance_view"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
+            android:layout_marginEnd="4dp"
+            app:curveColor="#3B82F6"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shadowEndColor="#083B82F6"
+            app:shadowStartColor="#663B82F6" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl3"
+        android:layout_width="350dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/white_corners_20"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cl2">
+
+        <ImageView
+            android:id="@+id/iv_cal"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="10dp"
+            android:src="@mipmap/cal_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_cal_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:text="卡路里"
+            android:textColor="#62748E"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_cal"
+            app:layout_constraintStart_toEndOf="@+id/iv_cal"
+            app:layout_constraintTop_toTopOf="@+id/iv_cal" />
+
+        <TextView
+            android:id="@+id/tv_cal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="192"
+            android:textColor="#0A0A0A"
+            android:textSize="26sp"
+            app:layout_constraintStart_toStartOf="@+id/iv_cal"
+            app:layout_constraintTop_toBottomOf="@+id/iv_cal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="kcal"
+            android:textColor="#90A1B9"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_cal"
+            app:layout_constraintStart_toEndOf="@+id/tv_cal" />
+
+        <com.example.demo.view.MotionCurveView
+            android:id="@+id/power_cal_view"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
+            android:layout_marginEnd="4dp"
+            app:curveColor="#F59E0B"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shadowEndColor="#08F59E0B"
+            app:shadowStartColor="#66F59E0B" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl4"
+        android:layout_width="350dp"
+        android:layout_height="120dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/white_corners_20"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cl3">
+
+        <ImageView
+            android:id="@+id/iv_use_time"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="10dp"
+            android:src="@mipmap/use_time_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_use_time_key"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:text="用时"
+            android:textColor="#62748E"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_use_time"
+            app:layout_constraintStart_toEndOf="@+id/iv_use_time"
+            app:layout_constraintTop_toTopOf="@+id/iv_use_time" />
+
+        <TextView
+            android:id="@+id/tv_use_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="00:06:23"
+            android:textColor="#0A0A0A"
+            android:textSize="26sp"
+            app:layout_constraintStart_toStartOf="@+id/iv_use_time"
+            app:layout_constraintTop_toBottomOf="@+id/iv_use_time" />
+
+        <com.example.demo.view.MotionCurveView
+            android:id="@+id/power_use_time_view"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
+            android:layout_marginEnd="10dp"
+            app:curveColor="#8B5CF6"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shadowEndColor="#088B5CF6"
+            app:shadowStartColor="#668B5CF6" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl5"
+        android:layout_width="350dp"
+        android:layout_height="120dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:background="@drawable/white_corners_20"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/cl2">
+
+        <ImageView
+            android:id="@+id/iv_power"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="10dp"
+            android:src="@mipmap/power_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:text="功率"
+            android:textColor="#62748E"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_power"
+            app:layout_constraintStart_toEndOf="@+id/iv_power"
+            app:layout_constraintTop_toTopOf="@+id/iv_power" />
+
+        <TextView
+            android:id="@+id/tv_power"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:textColor="#0A0A0A"
+            android:textSize="26sp"
+            app:layout_constraintStart_toStartOf="@+id/iv_power"
+            app:layout_constraintTop_toBottomOf="@+id/iv_power"
+            android:text="3.83" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="W"
+            android:textColor="#90A1B9"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_power"
+            app:layout_constraintStart_toEndOf="@+id/tv_power" />
+
+        <com.example.demo.view.MotionCurveView
+            android:id="@+id/power_view"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
+            app:curveColor="#10B981"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="10dp"
+            app:shadowEndColor="#0810B981"
+            app:shadowStartColor="#6610B981" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl6"
+        android:layout_width="350dp"
+        android:layout_height="120dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:background="@drawable/white_corners_20"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/cl3">
+
+        <ImageView
+            android:id="@+id/iv_laps"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="10dp"
+            android:src="@mipmap/lap_times_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:text="圈数"
+            android:textColor="#62748E"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_laps"
+            app:layout_constraintStart_toEndOf="@+id/iv_laps"
+            app:layout_constraintTop_toTopOf="@+id/iv_laps" />
+
+        <TextView
+            android:id="@+id/tv_laps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:textColor="#0A0A0A"
+            android:textSize="26sp"
+            app:layout_constraintStart_toStartOf="@+id/iv_laps"
+            app:layout_constraintTop_toBottomOf="@+id/iv_laps"
+            android:text="8" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="圈"
+            android:textColor="#90A1B9"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_laps"
+            app:layout_constraintStart_toEndOf="@+id/tv_laps" />
+
+        <com.example.demo.view.MotionCurveView
+            android:id="@+id/power_lap_view"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
+            app:curveColor="#EC4899"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="10dp"
+            app:shadowEndColor="#08EC4899"
+            app:shadowStartColor="#66EC4899"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl7"
+        android:layout_width="350dp"
+        android:layout_height="120dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        android:background="@drawable/white_corners_20"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/cl4">
+
+        <ImageView
+            android:id="@+id/iv_steps"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="10dp"
+            android:src="@mipmap/step_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:text="踏频"
+            android:textColor="#62748E"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_steps"
+            app:layout_constraintStart_toEndOf="@+id/iv_steps"
+            app:layout_constraintTop_toTopOf="@+id/iv_steps" />
+
+        <TextView
+            android:id="@+id/tv_steps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="8"
+            android:textColor="#0A0A0A"
+            android:textSize="26sp"
+            app:layout_constraintStart_toStartOf="@+id/iv_steps"
+            app:layout_constraintTop_toBottomOf="@+id/iv_steps" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="rpm"
+            android:textColor="#90A1B9"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_steps"
+            app:layout_constraintStart_toEndOf="@+id/tv_steps" />
+
+        <com.example.demo.view.MotionCurveView
+            android:id="@+id/power_step_view"
+            android:layout_width="200dp"
+            android:layout_height="100dp"
+            android:layout_marginEnd="4dp"
+            app:curveColor="#6366F1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_steps"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shadowEndColor="#086366F1"
+            app:shadowStartColor="#666366F1"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.example.demo.view.GaugeView
+        android:id="@+id/gauge_view"
+        android:layout_width="500dp"
+        android:layout_height="500dp"
+        android:layout_marginBottom="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
