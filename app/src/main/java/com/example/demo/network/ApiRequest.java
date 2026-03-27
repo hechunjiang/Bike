@@ -1,11 +1,8 @@
 package com.example.demo.network;
 
-import java.util.Map;
-
 import io.reactivex.Observable;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
-import retrofit2.http.QueryMap;
 
 /**
  * 接口定义

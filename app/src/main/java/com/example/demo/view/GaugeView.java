@@ -1,5 +1,6 @@
 package com.example.demo.view;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -8,9 +9,10 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 
 /**
- * 中间刻度表
+ * 中间刻度表（带动画效果）
  */
 public class GaugeView extends View {
     // 底部进度环
@@ -25,17 +27,20 @@ public class GaugeView extends View {
     private Paint textPaint;
     // 最大速度
     private float maxSpeed = 50f;
-    // 当前速度
-    private float currentSpeed = 15.4f;
+    // 目标速度（最终要显示的速度）
+    private float targetSpeed = 15.4f;
+    // 动画过渡中的当前速度（用于绘制）
+    private float animCurrentSpeed = 0f;
     // 弧形起始角度
     private float startAngle = 135f;
     // 弧形扫过角度
     private float sweepAngle = 270f;
 
     private RectF arcRect = new RectF();
-
     private Paint mPaint;
     private Path path;
+    // 动画对象
+    private ValueAnimator speedAnimator;
 
     public GaugeView(Context context) {
         super(context);
@@ -105,8 +110,8 @@ public class GaugeView extends View {
         int centerY = getHeight() / 2;
         float radius = (getWidth() - 100) >> 1;
 
-        // 1. 绘制底部进度环
-        float progressSweep = (currentSpeed / maxSpeed) * sweepAngle;
+        // 1. 绘制底部进度环（使用动画过渡的速度值）
+        float progressSweep = (animCurrentSpeed / maxSpeed) * sweepAngle;
         canvas.drawArc(arcRect, startAngle, progressSweep, false, arcPaint);
 
         // 2. 绘制刻度线
@@ -127,24 +132,24 @@ public class GaugeView extends View {
             textPaint.setTextSize(40);
             canvas.drawText(String.valueOf(i), textX, textY, textPaint);
         }
-        // 绘制一个带箭头的指针
-        // 1. 计算指针角度
-        float pointerAngle = startAngle + (currentSpeed / maxSpeed) * sweepAngle;
+
+        // 绘制带箭头的指针（使用动画过渡的速度值）
+        float pointerAngle = startAngle + (animCurrentSpeed / maxSpeed) * sweepAngle;
         float pointerRadian = (float) Math.toRadians(pointerAngle);
 
-        // 2. 指针尖端坐标
+        // 指针尖端坐标
         float pointerLength = radius - 60;
         float pointerEndX = centerX + pointerLength * (float) Math.cos(pointerRadian);
         float pointerEndY = centerY + pointerLength * (float) Math.sin(pointerRadian);
 
-        // 3. 指针尾部两点（宽度30）
+        // 指针尾部两点（宽度30）
         float pointXA = centerX - 10 * (float) Math.sin(pointerRadian);
-        float pointYA = centerY + 10 * (float) Math.cos(pointerRadian); // 修复：centerX → centerY
+        float pointYA = centerY + 10 * (float) Math.cos(pointerRadian);
 
         float pointXB = centerX + 10 * (float) Math.sin(pointerRadian);
-        float pointYB = centerY - 10 * (float) Math.cos(pointerRadian); // 修复：centerX → centerY
+        float pointYB = centerY - 10 * (float) Math.cos(pointerRadian);
 
-        // 4. 指针根部两点（宽度10）
+        // 指针根部两点（宽度10）
         float pointerLength1 = radius - 120;
         float pointerEnd1X = centerX + pointerLength1 * (float) Math.cos(pointerRadian);
         float pointerEnd1Y = centerY + pointerLength1 * (float) Math.sin(pointerRadian);
@@ -155,8 +160,8 @@ public class GaugeView extends View {
         float pointXD = pointerEnd1X + 4 * (float) Math.sin(pointerRadian);
         float pointYD = pointerEnd1Y - 4 * (float) Math.cos(pointerRadian);
 
-        // 5. 绘制指针路径
-        path.reset(); // 清空之前的路径
+        // 绘制指针路径
+        path.reset();
         path.moveTo(pointXA, pointYA);
         path.lineTo(pointXC, pointYC);
         path.lineTo(pointerEndX, pointerEndY);
@@ -171,20 +176,48 @@ public class GaugeView extends View {
         // 绘制中间白色圆圈
         canvas.drawCircle(centerX, centerY, 15, whitePaint);
 
-        // 4. 绘制中心速度数字
-
+        // 4. 绘制中心速度数字（使用动画过渡的速度值）
         textPaint.setTextSize(30);
         canvas.drawText("当前速度", centerX, centerY + 140, textPaint);
         textPaint.setTextSize(80);
-        canvas.drawText(String.valueOf((int) currentSpeed), centerX, centerY + 240, textPaint);
+        canvas.drawText(String.valueOf((int) animCurrentSpeed), centerX, centerY + 240, textPaint);
         textPaint.setTextSize(30);
         canvas.drawText("KM/H", centerX, centerY + 280, textPaint);
     }
 
-    // 对外方法：更新速度并刷新视图
+    // 对外方法：更新速度并执行动画
     public void setSpeed(float speed) {
-        this.currentSpeed = Math.max(0, Math.min(speed, maxSpeed));
-        invalidate();
+        // 限制速度范围
+        targetSpeed = Math.max(0, Math.min(speed, maxSpeed));
+        // 停止之前的动画（避免重复动画）
+        if (speedAnimator != null && speedAnimator.isRunning()) {
+            speedAnimator.cancel();
+        }
+
+        // 创建值动画：从当前动画值过渡到目标速度
+        speedAnimator = ValueAnimator.ofFloat(animCurrentSpeed, targetSpeed);
+        // 动画时长（可根据需求调整，单位：毫秒）
+        speedAnimator.setDuration(800);
+        // 减速插值器：动画先快后慢，更贴近真实指针转动效果
+        speedAnimator.setInterpolator(new DecelerateInterpolator(1.2f));
+        // 监听动画值变化
+        speedAnimator.addUpdateListener(animation -> {
+            // 更新动画过渡的速度值
+            animCurrentSpeed = (float) animation.getAnimatedValue();
+            // 重绘视图（触发onDraw）
+            invalidate();
+        });
+        // 启动动画
+        speedAnimator.start();
     }
 
+    // 生命周期：销毁时释放动画资源
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (speedAnimator != null) {
+            speedAnimator.cancel();
+            speedAnimator = null;
+        }
+    }
 }

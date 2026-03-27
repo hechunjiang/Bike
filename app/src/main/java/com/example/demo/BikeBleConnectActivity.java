@@ -20,7 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,26 +29,38 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.demo.data.BikeData;
 import com.example.demo.network.BikeRequestBean;
 import com.example.demo.network.NetWorkManager;
+import com.example.demo.util.DeviceIdUtil;
+import com.example.demo.util.LogToFileUtil;
+import com.example.demo.util.NumberUtils;
 import com.example.demo.view.GaugeView;
 import com.example.demo.view.MotionCurveView;
+
+import org.litepal.LitePal;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
+/**
+ * 蓝牙连接活动
+ */
 public class BikeBleConnectActivity extends AppCompatActivity {
     private static final String TAG = "BikeBleConnectActivity";
+    private SimpleDateFormat dateFormat;
     private static final int REQUEST_BLUETOOTH_PERMISSIONS = 1001;
     // 固定mac地址
     private static final String TARGET_MAC = "50:FB:19:43:38:9C";
@@ -58,26 +70,45 @@ public class BikeBleConnectActivity extends AppCompatActivity {
     private BluetoothGatt bluetoothGatt;
 
     private TextView tvDateValue;
-    private TextView tvTime;
+    private TextView tvBikeTime;
     private TextView tvWeek;
-    private TextView tvDistance;
+    private TextView tvTotalCo2;
     private TextView tvCal;
     private TextView tvUseTime;
-    private TextView tvPower;
+    private TextView tvDistance;
     private TextView tvLaps;
-    private MotionCurveView powerDistanceView;
+    private TextView tvSteps;
+
+    private MotionCurveView powerTotalCo2View;
     private MotionCurveView powerCalView;
     private MotionCurveView powerUseTimeView;
-    private MotionCurveView powerView;
-
+    private MotionCurveView powerDistance;
+    private MotionCurveView powerStepView;
     private MotionCurveView tapView;
-
     private GaugeView gaugeView;
-    private Runnable timeRunnable;
 
-    private Runnable updateRunnable;
+    private LinearLayout layoutConnected;
+    private LinearLayout layoutDisconnected;
+
+    // 除开今天的总里程
+    private Runnable timeRunnable;
     private Handler handler = new Handler(Looper.getMainLooper());
-    private Random random = new Random();
+
+    private Disposable disposable;
+
+
+    // 后端需要数据
+    private int count = 0;
+    private float cal;
+    private float speed;
+    private String glNumber;
+    private float useTime;
+
+    // 当日骑行距离 单位米
+    private float curTodayDistance;
+
+    // 计算圈数
+    private static final String DIVIDER = "0.909090909";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,23 +125,61 @@ public class BikeBleConnectActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         }
         setContentView(R.layout.bike);
-        NetWorkManager.getInstance().init();
         tvDateValue = findViewById(R.id.tv_date_value);
-        tvTime = findViewById(R.id.tv_time);
+        tvBikeTime = findViewById(R.id.tv_bike_time);
         tvWeek = findViewById(R.id.tv_week);
-
-        tvDistance = findViewById(R.id.tv_distance);
-        powerDistanceView = findViewById(R.id.power_distance_view);
+        layoutConnected = findViewById(R.id.layout_connected);
+        layoutDisconnected = findViewById(R.id.layout_disconnected);
+        tvTotalCo2 = findViewById(R.id.tv_total_co2);
+        powerTotalCo2View = findViewById(R.id.power_total_co2_view);
         tvCal = findViewById(R.id.tv_cal);
         powerCalView = findViewById(R.id.power_cal_view);
         tvUseTime = findViewById(R.id.tv_use_time);
         powerUseTimeView = findViewById(R.id.power_use_time_view);
-        powerView = findViewById(R.id.power_view);
-        tvPower = findViewById(R.id.tv_power);
+        powerDistance = findViewById(R.id.power_distance_view);
+        tvDistance = findViewById(R.id.tv_distance);
         tapView = findViewById(R.id.power_lap_view);
         tvLaps = findViewById(R.id.tv_laps);
-
+        powerStepView = findViewById(R.id.power_step_view);
+        tvSteps = findViewById(R.id.tv_steps);
         gaugeView = findViewById(R.id.gauge_view);
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+
+        // 初始化速度为0
+        gaugeView.setSpeed(0);
+
+        // 次数
+        List<BikeData> bikeDataList = LitePal.where("time = ?", dateFormat.format(new Date())).find(BikeData.class);
+        if (bikeDataList != null && !bikeDataList.isEmpty()) {
+            count = bikeDataList.size();
+            tvBikeTime.setText(String.format("%s", count));
+        } else {
+            tvBikeTime.setText("0");
+        }
+
+        // 碳减排量
+        tvTotalCo2.setText("0");
+        powerTotalCo2View.clearData();
+        // 消耗
+        tvCal.setText("0");
+        powerCalView.clearData();
+
+        // 使用时间
+        tvUseTime.setText("0");
+        powerUseTimeView.clearData();
+
+        // 距离
+        tvDistance.setText("0");
+        powerDistance.clearData();
+
+        // 圈数
+        tvLaps.setText("0");
+        tapView.clearData();
+
+        // 每公里消耗
+        tvSteps.setText("0");
+        powerStepView.clearData();
+
 
         // 初始化蓝牙
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -125,35 +194,15 @@ public class BikeBleConnectActivity extends AppCompatActivity {
             }
         };
         handler.post(timeRunnable);
-
-        /**   // 模拟每500ms更新一次功率数据
-         updateRunnable = new Runnable() {
-        @Override public void run() {
-        // 生成200-250之间的随机功率（模拟图中平稳波动效果）
-        float power = 20 + (random.nextFloat() * 10 - 3);
-        powerDistanceView.addData(power);
-        handler.postDelayed(this, 500); // 500ms后再次执行
-        }
-        };
-
-         // 开始更新
-         handler.post(updateRunnable);**/
-
     }
 
     /**
      * 显示实时时间
      */
     public void showTime() {
-        // 日期
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        // 时间
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         //星期几
         SimpleDateFormat weekFormat = new SimpleDateFormat("EEEE", Locale.getDefault());
-
         tvDateValue.setText(dateFormat.format(new Date()));
-        tvTime.setText(timeFormat.format(new Date()));
         tvWeek.setText(weekFormat.format(new Date()));
     }
 
@@ -162,14 +211,14 @@ public class BikeBleConnectActivity extends AppCompatActivity {
         List<String> permissionsNeeded = new ArrayList<>();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                permissionsNeeded.add(android.Manifest.permission.BLUETOOTH_SCAN);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.BLUETOOTH_SCAN);
             }
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                permissionsNeeded.add(android.Manifest.permission.BLUETOOTH_CONNECT);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.BLUETOOTH_CONNECT);
             }
         } else {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 permissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION);
             }
         }
@@ -219,14 +268,12 @@ public class BikeBleConnectActivity extends AppCompatActivity {
 
                 BluetoothDevice device = result.getDevice();
                 String deviceMac = device.getAddress();
-                Log.d("deviceMac:", "Mac地址：" + deviceMac);
                 // ====================== 关键：匹配你的设备 MAC ======================
                 if (TARGET_MAC.equals(deviceMac)) {
+                    Log.d("deviceMac:", "Mac地址：" + deviceMac);
                     Toast.makeText(BikeBleConnectActivity.this, "找到自行车设备，正在连接...", Toast.LENGTH_SHORT).show();
-
                     // 停止扫描
                     bleScanner.stopScan(this);
-
                     // ====================== 直接连接设备（不经过系统配对！） ======================
                     connectBleDevice(device);
                 }
@@ -239,7 +286,6 @@ public class BikeBleConnectActivity extends AppCompatActivity {
     private void connectBleDevice(BluetoothDevice device) {
         // 连接设备（false = 不自动重连）
         bluetoothGatt = device.connectGatt(this, false, new BluetoothGattCallback() {
-
             // 连接状态改变（连接成功/断开）
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -248,11 +294,43 @@ public class BikeBleConnectActivity extends AppCompatActivity {
                 if (newState == BluetoothGatt.STATE_CONNECTED) {
                     Log.d("BlueTooth", "设备连接成功" + device.getAddress() + "-----" + device.getName());
                     // 连接成功后，搜索设备服务（获取数据用）
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            layoutConnected.setVisibility(View.VISIBLE);
+                            layoutDisconnected.setVisibility(View.GONE);
+                        }
+                    });
                     gatt.discoverServices();
                 }
                 if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                     Log.d("BlueTooth", "设备蓝牙断连");
-                    gaugeView.setSpeed(0);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            layoutConnected.setVisibility(View.GONE);
+                            layoutDisconnected.setVisibility(View.VISIBLE);
+                            powerTotalCo2View.clearData();
+                            powerCalView.clearData();
+                            powerDistance.clearData();
+                            powerUseTimeView.clearData();
+                            tapView.clearData();
+                            powerStepView.clearData();
+                            gaugeView.setSpeed(0);
+
+                            // 断链一次存一次数据
+                            BikeData bikeData = new BikeData();
+                            bikeData.setTime(dateFormat.format(new Date()));
+                            bikeData.setDistance(curTodayDistance + "");
+                            boolean isSave = bikeData.save();
+                            if (isSave) {
+                                count++;
+                                tvBikeTime.setText(String.format("%s", count));
+                            }
+                            Log.d(TAG, "数据保存:" + (isSave ? "成功" : "失败"));
+
+                        }
+                    });
                 }
             }
 
@@ -261,28 +339,6 @@ public class BikeBleConnectActivity extends AppCompatActivity {
             public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                 super.onServicesDiscovered(gatt, status);
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    // 遍历所有服务 device确定 特征值 服务id就确认
-
-                    /*for (BluetoothGattService service : gatt.getServices()) {
-                        Log.d("Bluetooth", "服务UUID：" + service.getUuid().toString());
-                        serviceUUID = UUID.fromString(service.getUuid().toString());
-                        // 遍历当前服务下的所有特征值
-                        for (BluetoothGattCharacteristic chara : service.getCharacteristics()) {
-                            Log.d("Bluetooth", "  特征值UUID：" + chara.getUuid().toString());
-                            charUUID = UUID.fromString(chara.getUuid().toString());
-                            tvStic.setText(String.format("服务UUID:%s\n特征值UUID:%s", service.getUuid().toString(), chara.getUuid().toString()));
-                            // 打印特征值属性（判断是否支持通知）
-                            int properties = chara.getProperties();
-                            String propStr = "";
-                            if ((properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
-                                propStr += "NOTIFY | ";
-                            }
-                            if ((properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) != 0) {
-                                propStr += "INDICATE | ";
-                            }
-                            Log.d("Bluetooth", "  特征值属性：" + propStr);
-                        }
-                    }*/
                     UUID serviceUUID = UUID.fromString("0000ffa0-0000-1000-8000-00805f9b34fb");
                     UUID charUUID = UUID.fromString("00001801-0000-1000-8000-00805f9b34fb");
                     Log.d("Bluetooth1", "服务发现成功");
@@ -332,44 +388,59 @@ public class BikeBleConnectActivity extends AppCompatActivity {
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 super.onCharacteristicChanged(gatt, characteristic);
                 // 这里就是自行车实时数据
-                byte[] data = characteristic.getValue();
-                // 解析 data 即可得到速度、里程、电量等
-                Log.d(TAG, bytesToHex(data));
-                LogToFileUtil.d(BikeBleConnectActivity.this, "BikeBleConnectActivity", bytesToHex(data));
-                float distance = parseMotion(bytesToHex(data), 4);
-                tvDistance.setText(String.format("%s", distance));
-                powerDistanceView.addData(distance);
-                float cal = parseMotion(bytesToHex(data), 3);
-                tvCal.setText(String.format("%s", cal / 1000.0));
-                float useTime = parseMotion(bytesToHex(data), 1);
-                powerCalView.addData(cal);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // 有数据连接显示
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                layoutConnected.setVisibility(View.VISIBLE);
+                                layoutDisconnected.setVisibility(View.GONE);
+                            }
+                        });
 
-                tvUseTime.setText(formatSeconds((int) useTime));
-                powerUseTimeView.addData(useTime);
+                        byte[] data = characteristic.getValue();
+                        // 解析 data 即可得到速度、里程、电量等
+                        Log.d(TAG, bytesToHex(data));
+                        LogToFileUtil.d(BikeBleConnectActivity.this, "BikeBleConnectActivity", bytesToHex(data));
 
-                // 速度
-                float speed = parseMotion(bytesToHex(data), 5);
-                gaugeView.setSpeed(speed);
-                // 圈数
-                String qNumber = divide(distance + "", "188.4");
-                tvLaps.setText(qNumber);
-                tapView.addData(Float.parseFloat(qNumber));
-                String glNumber = divide(cal + "", distance + "");
-                tvPower.setText(glNumber);
-                powerView.addData(Float.parseFloat(glNumber));
+                        // 行驶距离
+                        curTodayDistance = parseMotion(bytesToHex(data), 4);
+                        // 碳排放
+                        tvTotalCo2.setText(NumberUtils.stringMultiply(curTodayDistance + "", "0.08"));
+                        powerTotalCo2View.addData(NumberUtils.stringMultiplyToFloat(curTodayDistance + "", "0.08"));
 
-                // 发送数据
-                BikeRequestBean bikeRequestBean = new BikeRequestBean();
-                bikeRequestBean.setBicycleId("11");
-                bikeRequestBean.setPower("23");
-                bikeRequestBean.setEmission("5");
+                        // 消耗
+                        cal = parseMotion(bytesToHex(data), 3);
+                        tvCal.setText(NumberUtils.stringDivideFloor(cal + "", "1000"));
+                        powerCalView.addData(cal);
 
-                bikeRequestBean.setSpeed(speed + "");
-                bikeRequestBean.setDuration(useTime + "");
-                bikeRequestBean.setMileage(distance + "");
-                bikeRequestBean.setCalories(cal + "");
-                sendBikeData(bikeRequestBean);
+                        // 里程
+                        tvDistance.setText(NumberUtils.stringDivideFloor(curTodayDistance + "", "1000"));
+                        powerDistance.addData(NumberUtils.stringDivideToFloat(curTodayDistance + "", "1000"));
 
+                        // 用时
+                        useTime = parseMotion(bytesToHex(data), 1);
+                        tvUseTime.setText(formatSeconds((int) useTime));
+                        powerUseTimeView.addData(useTime);
+
+                        // 速度
+                        speed = parseMotion(bytesToHex(data), 5);
+                        gaugeView.setSpeed(speed);
+                        // 圈数
+                        String qNumber = NumberUtils.stringMultiply(curTodayDistance + "", DIVIDER);
+                        tvLaps.setText(qNumber);
+                        tapView.addData(Float.parseFloat(qNumber));
+
+                        // 每公里消耗
+                        glNumber = NumberUtils.stringDivideFloor(NumberUtils.stringDivideFloor(cal + "", "1000"), NumberUtils.stringDivideFloor(curTodayDistance + "", "1000"));
+                        tvSteps.setText(glNumber);
+                        powerStepView.addData(Float.parseFloat(glNumber));
+
+                        sendBikeData();
+                    }
+                });
             }
 
             // 写入特征值回调
@@ -385,66 +456,6 @@ public class BikeBleConnectActivity extends AppCompatActivity {
         });
     }
 
-    // ====================== 发送数据 ======================
-
-    /**
-     * 向蓝牙设备发送数据
-     *
-     * @param gatt          已连接的BluetoothGatt实例
-     * @param serviceUUID   目标服务UUID
-     * @param writeCharUUID 支持写入的特征值UUID
-     * @param data          要发送的字节数组（注意：BLE单次发送数据长度通常≤20字节）
-     * @return 是否成功发起写入请求
-     */
-    public boolean sendDataToDevice(BluetoothGatt gatt, UUID serviceUUID, UUID writeCharUUID, byte[] data) {
-        // 1. 校验gatt连接状态
-        if (gatt == null || data == null || data.length == 0) {
-            Log.e("Bluetooth", "gatt为空或数据为空，发送失败");
-            return false;
-        }
-
-        // 2. 获取目标服务和特征值
-        BluetoothGattCharacteristic writeCharacteristic = gatt.getService(serviceUUID).getCharacteristic(writeCharUUID);
-        if (writeCharacteristic == null) {
-            Log.e("Bluetooth", "找不到写入特征值，检查UUID是否正确");
-            return false;
-        }
-
-        // 3. 检查特征值是否支持写入
-        int properties = writeCharacteristic.getProperties();
-        boolean isWritable = (properties & BluetoothGattCharacteristic.PROPERTY_WRITE) != 0
-                || (properties & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) != 0;
-        if (!isWritable) {
-            Log.e("Bluetooth", "该特征值不支持写入");
-            return false;
-        }
-
-        // 4. 设置要发送的数据（核心步骤）
-        writeCharacteristic.setValue(data);
-
-        // 5. 选择写入类型（根据特征值支持的属性）
-        if ((properties & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) != 0) {
-            // 无响应写入（设备无需回复，速度快，不保证送达）
-            writeCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-        } else {
-            // 有响应写入（设备会回复写入结果，速度稍慢，保证送达）
-            writeCharacteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-        }
-
-        // 6. 发起写入请求（异步操作，结果在onCharacteristicWrite回调中返回）
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "蓝牙连接失败", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        boolean writeSuccess = gatt.writeCharacteristic(writeCharacteristic);
-        if (writeSuccess) {
-            Log.d("Bluetooth", "写入请求已发起，待设备响应");
-        } else {
-            Log.e("Bluetooth", "写入请求发起失败（可能gatt正忙）");
-        }
-        return writeSuccess;
-    }
-
     /**
      * 将byte转换为16进制
      *
@@ -457,46 +468,6 @@ public class BikeBleConnectActivity extends AppCompatActivity {
             sb.append(String.format("%02X", b));
         }
         return sb.toString();
-    }
-
-    /**
-     * 两个String类型数值相除，保留两位小数且向下取整
-     *
-     * @param dividendStr 被除数（String类型，如"10.5"）
-     * @param divisorStr  除数（String类型，如"3"）
-     * @return 向下取整后两位小数的String，异常时返回"0.00"
-     */
-    public static String divide(String dividendStr, String divisorStr) {
-        // 1. 空值/空字符串处理
-        if (dividendStr == null || dividendStr.trim().isEmpty()
-                || divisorStr == null || divisorStr.trim().isEmpty()) {
-            return "0.00";
-        }
-
-        double dividend;
-        double divisor;
-        try {
-            // 2. String转Double（兼容整数/小数格式）
-            dividend = Double.parseDouble(dividendStr.trim());
-            divisor = Double.parseDouble(divisorStr.trim());
-
-            // 3. 除数为0防护
-            if (divisor == 0) {
-                return "0.00";
-            }
-
-            // 4. 执行除法 + 向下取整保留两位小数
-            double result = dividend / divisor;
-            // 先×100向下取整，再÷100，保证两位小数严格向下取整
-            double floorResult = Math.floor(result * 100) / 100;
-
-            // 5. 格式化为两位小数的String（补零，如2.5→2.50）
-            return String.format("%.2f", floorResult);
-
-        } catch (NumberFormatException e) {
-            // 非数字格式异常（如"abc"），返回默认值
-            return "0.00";
-        }
     }
 
     /**
@@ -570,21 +541,28 @@ public class BikeBleConnectActivity extends AppCompatActivity {
         return 0.0f;
     }
 
-    public void sendBikeData(BikeRequestBean bikeRequestBean) {
-        Disposable disposable = NetWorkManager.getApiRequest()
-                .pEmissionBicycle(bikeRequestBean)
+    public void sendBikeData() {
+        disposable = Observable.interval(0, 60, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
+                .flatMap((Function<Long, ObservableSource<Object>>) aLong -> {
+                    // 发送数据
+                    BikeRequestBean bikeRequestBean = new BikeRequestBean();
+                    bikeRequestBean.setBicycleId(DeviceIdUtil.getAppUUID(this));
+                    bikeRequestBean.setPower("23");
+                    // 总里程
+                    bikeRequestBean.setEmission(NumberUtils.stringDivideFloor(curTodayDistance + "", "1000"));
+                    bikeRequestBean.setSpeed(speed + "");
+                    bikeRequestBean.setDuration(useTime + "");
+                    bikeRequestBean.setMileage(curTodayDistance + "");
+                    bikeRequestBean.setCalories(cal + "");
+                    return NetWorkManager.getApiRequest().pEmissionBicycle(bikeRequestBean)
+                            .subscribeOn(Schedulers.io());
+                })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Object>() {
-                    @Override
-                    public void accept(Object o) throws Exception {
+                .subscribe(o -> {
 
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
+                }, throwable -> {
 
-                    }
                 });
     }
 
@@ -592,9 +570,12 @@ public class BikeBleConnectActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         // 断开连接
-        if (bluetoothGatt != null && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+        if (bluetoothGatt != null && ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
             bluetoothGatt.disconnect();
             bluetoothGatt.close();
+        }
+        if (disposable != null) {
+            disposable.dispose();
         }
     }
 }
