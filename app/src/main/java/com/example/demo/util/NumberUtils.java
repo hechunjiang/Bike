@@ -3,6 +3,7 @@ package com.example.demo.util;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.Locale;
 
 public class NumberUtils {
     public static String stringDivideFloor(String strNum1, String strNum2) {
@@ -101,5 +102,31 @@ public class NumberUtils {
         } catch (Exception e) {
             return 0.0f;
         }
+    }
+
+    /**
+     * 判断是否为 null 或 等于0
+     */
+    public static boolean isNullOrZero(BigDecimal num) {
+        return num == null || num.compareTo(BigDecimal.ZERO) == 0;
+    }
+
+
+    /**
+     * 将总秒数 转换为 00:00:00 格式
+     *
+     * @param totalSeconds 总秒数
+     * @return 格式化后的时间字符串
+     */
+    public static String formatSeconds(int totalSeconds) {
+        // 计算小时
+        int hours = totalSeconds / 3600;
+        // 计算分钟
+        int minutes = (totalSeconds % 3600) / 60;
+        // 计算秒
+        int seconds = totalSeconds % 60;
+
+        // %02d：不足2位自动补0，格式化输出
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
     }
 }
