@@ -169,6 +169,7 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
      * 初始化数据
      */
     public void initData() {
+        isCanSend = true;
         // 初始化速度为0
         gaugeView.setSpeed(0);
 
@@ -341,7 +342,7 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
                     // 发送数据
                     BikeRequestBean bikeRequestBean = new BikeRequestBean();
                     bikeRequestBean.setBicycleId(DeviceIdUtil.getAppUUID(this));
-                    bikeRequestBean.setPower("23");
+//                    bikeRequestBean.setPower("23");
                     // 总里程
                     bikeRequestBean.setEmission(NumberUtils.stringDivideFloor(curTodayDistance + "", "1000"));
                     bikeRequestBean.setSpeed(speed + "");
