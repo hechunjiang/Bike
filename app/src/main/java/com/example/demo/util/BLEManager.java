@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public class BLEManager {
     private static final String TAG = "BLEManager";
-    private static final long RECONNECT_DELAY = 1500;
+    private static final long RECONNECT_DELAY = 2000;
 
     private static BLEManager mInstance;
     private final Context mAppContext;
@@ -63,7 +63,6 @@ public class BLEManager {
     public void connect(String mac) {
         if (mac == null || mac.isEmpty()) return;
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) return;
-
         closeGatt();
         mTargetDevice = mBluetoothAdapter.getRemoteDevice(mac);
         mBluetoothGatt = mTargetDevice.connectGatt(mAppContext, false, gattCallback);
@@ -73,6 +72,7 @@ public class BLEManager {
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            Log.e(TAG, "蓝牙连接status:" + status + "---newState:" + newState);
             if (newState == BluetoothGatt.STATE_CONNECTED) {
                 Log.e(TAG, "连接成功");
                 callBack.bleConnectSuccess();
@@ -80,7 +80,7 @@ public class BLEManager {
                 gatt.discoverServices();
 
             } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
-                Log.e(TAG, "断开连接 → 自动重连");
+                Log.e(TAG, "断开连接");
                 callBack.bleReConnect();
                 closeGatt();
                 if (isAutoReconnect) startReConnect();
@@ -136,6 +136,7 @@ public class BLEManager {
 
         mMainHandler.postDelayed(() -> {
             if (mTargetDevice != null) {
+                Log.e(TAG, "自动重连");
                 connect(mTargetDevice.getAddress());
             }
             isReconnecting = false;
@@ -148,7 +149,9 @@ public class BLEManager {
             try {
                 mBluetoothGatt.disconnect();
                 mBluetoothGatt.close();
+                Log.e(TAG, "关闭Gatt");
             } catch (Exception e) {
+                Log.e(TAG, "关闭Gatt:" + e.toString());
             }
             mBluetoothGatt = null;
         }
