@@ -14,7 +14,7 @@ public class MyApplication extends Application {
         super.onCreate();
         LitePal.initialize(this);
         NetWorkManager.getInstance().init();
-//        grantAutoStart();
+        grantAutoStart();
     }
 
     // 执行ROOT命令，把APP加入系统自启白名单

@@ -175,6 +175,8 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
         // 碳减排量
         tvTotalCo2.setText("0");
         powerTotalCo2View.clearData();
+        powerTotalCo2View.setMaxShowCount(5);
+
         // 消耗
         tvCal.setText("0");
         powerCalView.clearData();
@@ -252,8 +254,8 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
                 // 行驶距离
                 curTodayDistance = BLEManager.parseMotion(data, 4);
                 // 碳排放
-                tvTotalCo2.setText(NumberUtils.stringMultiply(curTodayDistance + "", "0.08"));
-                powerTotalCo2View.addData(NumberUtils.stringMultiplyToFloat(curTodayDistance + "", "0.08"));
+                tvTotalCo2.setText(NumberUtils.stringMultiply(curTodayDistance + "", "0.09"));
+                powerTotalCo2View.addData(NumberUtils.stringMultiplyToFloat(curTodayDistance + "", "0.09"));
 
                 // 消耗
                 cal = BLEManager.parseMotion(data, 3);

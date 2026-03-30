@@ -170,7 +170,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="gCO2"
+            android:text="gCO₂"
             android:textColor="#90A1B9"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="@+id/tv_total_co2"

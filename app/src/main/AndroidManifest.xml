@@ -30,9 +30,9 @@
         android:required="true" />
 
     <!-- 申请 ROOT 相关 -->
-    <!--    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+        <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
         <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-        <uses-permission android:name="android.permission.ACCESS_SUPERUSER" />-->
+        <uses-permission android:name="android.permission.ACCESS_SUPERUSER" />
 
     <application
         android:name=".MyApplication"
@@ -55,7 +55,7 @@
             </intent-filter>
         </activity>
 
-        <!--   <receiver
+           <receiver
        android:name=".BootReceiver"
        android:enabled="true"
        android:exported="true">
@@ -64,7 +64,7 @@
            <action android:name="android.intent.action.QUICKBOOT_POWERON" />
            <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
        </intent-filter>
-   </receiver>-->
+   </receiver>
     </application>
 
 </manifest>
