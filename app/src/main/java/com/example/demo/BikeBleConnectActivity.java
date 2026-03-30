@@ -192,6 +192,7 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
         // 圈数
         tvLaps.setText("0");
         tapView.clearData();
+        tapView.setMaxShowCount(5);
 
         // 每公里消耗
         tvSteps.setText("0");
