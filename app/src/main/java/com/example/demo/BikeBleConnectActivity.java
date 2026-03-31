@@ -344,6 +344,7 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
                     BikeRequestBean bikeRequestBean = new BikeRequestBean();
                     bikeRequestBean.setBicycleId(TARGET_MAC);
 //                    bikeRequestBean.setPower("23");
+                    bikeRequestBean.setCount(count + "");
                     // 碳排放量
                     bikeRequestBean.setEmission(NumberUtils.stringMultiply(curTodayDistance + "", "0.09"));
                     bikeRequestBean.setSpeed(speed + "");

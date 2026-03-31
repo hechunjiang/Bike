@@ -8,6 +8,15 @@ public class BikeRequestBean {
     private String mileage;
     private String emission;
     private String calories;
+    private String count;
+
+    public String getCount() {
+        return count;
+    }
+
+    public void setCount(String count) {
+        this.count = count;
+    }
 
     public String getBicycleId() {
         return bicycleId;
