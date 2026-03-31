@@ -55,7 +55,8 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
     private SimpleDateFormat weekFormat;
     private static final int REQUEST_BLUETOOTH_PERMISSIONS = 1001;
     // 固定mac地址
-    private static final String TARGET_MAC = "50:FB:19:43:38:9C";
+//    private static final String TARGET_MAC = "50:FB:19:43:38:9C";
+    private static final String TARGET_MAC = "50:FB:19:43:38:82";
     private TextView tvDateValue;
     private TextView tvBikeTime;
     private TextView tvWeek;
@@ -341,7 +342,7 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
                 .flatMap((Function<Long, ObservableSource<Object>>) aLong -> {
                     // 发送数据
                     BikeRequestBean bikeRequestBean = new BikeRequestBean();
-                    bikeRequestBean.setBicycleId(DeviceIdUtil.getAppUUID(this));
+                    bikeRequestBean.setBicycleId(TARGET_MAC);
 //                    bikeRequestBean.setPower("23");
                     // 碳排放量
                     bikeRequestBean.setEmission(NumberUtils.stringMultiply(curTodayDistance + "", "0.09"));
