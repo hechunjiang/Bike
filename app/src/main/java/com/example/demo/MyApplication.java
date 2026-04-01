@@ -8,11 +8,14 @@ import org.litepal.LitePal;
 
 import java.io.DataOutputStream;
 
+import xcrash.XCrash;
+
 public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
         LitePal.initialize(this);
+        XCrash.init(this);
         NetWorkManager.getInstance().init();
         grantAutoStart();
     }

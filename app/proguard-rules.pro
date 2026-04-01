@@ -19,3 +19,13 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# xCrash 混淆规则
+-keep class xcrash.NativeCrashHandler {
+    native <methods>;
+    void callback(...);
+}
+-keep class xcrash.ANRHandler {
+    native <methods>;
+    void callback(...);
+}
+-keep class xcrash.XCrash { *; }
