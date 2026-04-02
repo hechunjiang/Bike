@@ -22,14 +22,10 @@ import com.example.demo.network.BikeRequestBean;
 import com.example.demo.network.NetWorkManager;
 import com.example.demo.util.BLEManager;
 import com.example.demo.util.BleCallBack;
-import com.example.demo.util.DeviceIdUtil;
 import com.example.demo.util.LogToFileUtil;
 import com.example.demo.util.NumberUtils;
 import com.example.demo.view.GaugeView;
 import com.example.demo.view.MotionCurveView;
-
-import org.litepal.LitePal;
-import org.litepal.crud.callback.FindMultiCallback;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -54,9 +50,16 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
     private SimpleDateFormat dateFormat;
     private SimpleDateFormat weekFormat;
     private static final int REQUEST_BLUETOOTH_PERMISSIONS = 1001;
+    //    --------------------  自行配置更改  --------------------
+    public static final String BASE_URL = "http://182.150.57.52:39527/";
     // 固定mac地址
 //    private static final String TARGET_MAC = "50:FB:19:43:38:9C";
     private static final String TARGET_MAC = "50:FB:19:43:38:82";
+    // 计算圈数
+    private static final String DIVIDER = "0.909090909";
+    // 每多少分钟上送一次数据
+    private static final int INTERVAL_60 = 30;
+    //    --------------------  自行配置更改  --------------------
     private TextView tvDateValue;
     private TextView tvBikeTime;
     private TextView tvWeek;
@@ -82,6 +85,7 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
     private Runnable timeRunnable;
     private Handler handler = new Handler(Looper.getMainLooper());
     private Disposable disposable;
+    private Disposable countDisposable;
     // 后端需要数据
     private int count = 0;
     private float cal;
@@ -91,11 +95,6 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
 
     // 当日骑行距离 单位米
     private float curTodayDistance;
-
-    // 计算圈数
-    private static final String DIVIDER = "0.909090909";
-    // 每多少分钟上送一次数据
-    private static final int INTERVAL_60 = 60;
     // 数据发送 保证只启动一次定时器
     private boolean isCanSend = true;
 
@@ -136,18 +135,9 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
         weekFormat = new SimpleDateFormat("EEEE", Locale.getDefault());
 
         // 次数 异步查询防止超时
-        LitePal.where("time = ?", dateFormat.format(new Date())).findAsync(BikeData.class).listen(new FindMultiCallback<BikeData>() {
-            @Override
-            public void onFinish(List<BikeData> list) {
-                if (list != null && !list.isEmpty()) {
-                    count = list.size();
-                    tvBikeTime.setText(String.format("%s", count));
-                } else {
-                    tvBikeTime.setText("0");
-                }
-            }
-        });
+        getBikeCount();
 
+        // 初始化数据
         initData();
 
         // 初始化蓝牙
@@ -297,7 +287,7 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
     @Override
     public void bleConnectSuccess() {
         runOnUiThread(() -> {
-            if (count==0){
+            if (count == 0) {
                 count = 1;
             }
             tvBikeTime.setText(String.format("%s", count));
@@ -347,7 +337,6 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
                     // 发送数据
                     BikeRequestBean bikeRequestBean = new BikeRequestBean();
                     bikeRequestBean.setBicycleId(TARGET_MAC);
-//                    bikeRequestBean.setPower("23");
                     bikeRequestBean.setCount(count + "");
                     // 碳排放量
                     bikeRequestBean.setEmission(NumberUtils.stringMultiply(curTodayDistance + "", "0.09"));
@@ -366,6 +355,20 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
                 });
     }
 
+    public void getBikeCount() {
+        countDisposable = NetWorkManager.getApiRequest().getBikeCount(TARGET_MAC)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(o -> {
+                    if (o != null) {
+                        count = o.getData();
+                        tvBikeTime.setText(String.format("%s", count));
+                    }
+                }, throwable -> {
+                    Log.e(TAG, "获取运动次数失败", throwable);
+                });
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -374,6 +377,9 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
         // 网络释放
         if (disposable != null) {
             disposable.dispose();
+        }
+        if (countDisposable != null) {
+            countDisposable.dispose();
         }
     }
 }

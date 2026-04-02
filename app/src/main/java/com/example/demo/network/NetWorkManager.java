@@ -2,6 +2,7 @@ package com.example.demo.network;
 
 import android.util.Log;
 
+import com.example.demo.BikeBleConnectActivity;
 import com.example.demo.network.converter.GoonConverterFactory;
 import com.google.gson.Gson;
 
@@ -60,7 +61,7 @@ public class NetWorkManager {
         // 初始化Retrofit
         retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl(ApiRequest.HOST_URL_MAIN)
+                .baseUrl(BikeBleConnectActivity.BASE_URL)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GoonConverterFactory.create(new Gson()))
                 .build();
