@@ -7,10 +7,18 @@ import java.util.Locale;
 
 public class NumberUtils {
     public static String stringDivideFloor(String strNum1, String strNum2) {
+        // 空值/除数为0防护
+        if (strNum1 == null || strNum2 == null || strNum2.trim().isEmpty()) {
+            return "0.00";
+        }
         // 转成 BigDecimal（精度最高，不丢精度）
         BigDecimal num1 = new BigDecimal(strNum1);
         BigDecimal num2 = new BigDecimal(strNum2);
 
+        // 除数不能为0
+        if (num2.compareTo(BigDecimal.ZERO) == 0) {
+            return "0.00";
+        }
         // 1. 相除
         // 2. 向下取整（RoundingMode.FLOOR）
         // 3. 保留 2 位小数
