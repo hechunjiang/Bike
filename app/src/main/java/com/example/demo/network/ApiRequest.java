@@ -1,5 +1,6 @@
 package com.example.demo.network;
 
+import com.example.demo.data.BiKeResponseData;
 import com.example.demo.data.GetCountResponse;
 
 import io.reactivex.Observable;
@@ -19,6 +20,6 @@ public interface ApiRequest {
     Observable<Object> pEmissionBicycle(@Body BikeRequestBean map);
 
     @GET("/carbonProperty/pEmissionBicycle/count")
-    Observable<GetCountResponse<Integer>> getBikeCount(@Query("bakeId") String bakeId);
+    Observable<GetCountResponse<BiKeResponseData>> getBikeCount(@Query("bakeId") String bakeId);
 
 }

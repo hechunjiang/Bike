@@ -359,7 +359,7 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(o -> {
                     if (o != null) {
-                        count = o.getData();
+                        count = o.getData().getCount();
                         tvBikeTime.setText(String.format("%s", count));
                     }
                 }, throwable -> {
