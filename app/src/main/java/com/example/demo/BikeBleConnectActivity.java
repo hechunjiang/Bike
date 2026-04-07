@@ -287,10 +287,7 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
     @Override
     public void bleConnectSuccess() {
         runOnUiThread(() -> {
-            if (count == 0) {
-                count = 1;
-            }
-            tvBikeTime.setText(String.format("%s", count));
+            getBikeCount();
             layoutConnected.setVisibility(View.VISIBLE);
             layoutDisconnected.setVisibility(View.GONE);
         });
