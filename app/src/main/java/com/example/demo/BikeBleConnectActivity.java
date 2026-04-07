@@ -304,6 +304,10 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
                 // 断链停止网络请求
                 disposable.dispose();
             }
+            if (countDisposable != null) {
+                // 断链停止网络请求
+                countDisposable.dispose();
+            }
         });
     }
 
