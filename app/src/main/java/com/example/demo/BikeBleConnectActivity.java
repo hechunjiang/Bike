@@ -298,8 +298,6 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
             layoutDisconnected.setVisibility(View.VISIBLE);
             // 重置数据
             initData();
-            // 重新获取次数
-            getBikeCount();
             if (disposable != null) {
                 // 断链停止网络请求
                 disposable.dispose();
