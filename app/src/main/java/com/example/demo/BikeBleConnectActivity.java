@@ -328,6 +328,9 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
      * 发送数据保存到后端
      */
     public void sendBikeData() {
+        if (count == 0) {
+            return;
+        }
         disposable = Observable.interval(0, INTERVAL_60, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .flatMap((Function<Long, ObservableSource<Object>>) aLong -> {
