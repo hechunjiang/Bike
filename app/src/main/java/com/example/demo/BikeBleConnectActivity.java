@@ -310,8 +310,6 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
                 bikeData.setDistance(curTodayDistance + "");
                 boolean isSave = bikeData.save();
                 Log.d(TAG, "数据保存：" + (isSave ? "成功" : "失败"));
-                count = count + 1;
-                tvBikeTime.setText(String.format("%s", count));
                 // 当前距离
                 curTodayDistance = 0;
             } else {
