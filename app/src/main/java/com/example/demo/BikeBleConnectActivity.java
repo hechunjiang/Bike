@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.example.demo.data.BikeData;
 import com.example.demo.network.BikeRequestBean;
 import com.example.demo.network.NetWorkManager;
 import com.example.demo.util.BLEManager;
@@ -27,7 +26,6 @@ import com.example.demo.util.NumberUtils;
 import com.example.demo.view.GaugeView;
 import com.example.demo.view.MotionCurveView;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -300,21 +298,8 @@ public class BikeBleConnectActivity extends AppCompatActivity implements BleCall
             layoutDisconnected.setVisibility(View.VISIBLE);
             // 重置数据
             initData();
-            BigDecimal number = new BigDecimal(curTodayDistance + "");
-            // 当前保存成功 且当前距离不为0，保存成功置为0，防止重连后反复保存
-            if (!NumberUtils.isNullOrZero(number)) {
-                Log.d(TAG, "当次行驶距离:" + number);
-                // 保存数据库
-                BikeData bikeData = new BikeData();
-                bikeData.setTime(dateFormat.format(new Date()));
-                bikeData.setDistance(curTodayDistance + "");
-                boolean isSave = bikeData.save();
-                Log.d(TAG, "数据保存：" + (isSave ? "成功" : "失败"));
-                // 当前距离
-                curTodayDistance = 0;
-            } else {
-                Log.d(TAG, "当次行驶距离为0 不保存数据");
-            }
+            // 重新获取次数
+            getBikeCount();
             if (disposable != null) {
                 // 断链停止网络请求
                 disposable.dispose();
